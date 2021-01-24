@@ -1,0 +1,18 @@
+License CC BY-NC except the following assets:
+
+This project uses the following audio files from freesound.org
+- grenade (author ljudman) https://freesound.org/people/ljudman/sounds/33245/ under license https://creativecommons.org/licenses/sampling+/1.0/
+- gunshot 4 (author ShawnyBoy) https://freesound.org/people/ShawnyBoy/sounds/166191/ under CC0 license
+- flames 1 (author shastrocks) https://freesound.org/people/shastrocks/sounds/182120/ under CC0 license
+- fighting game grunts young female (author AderuMoro) https://freesound.org/people/AderuMoro/sounds/213295/ under CCBy3.0 license
+- AssaultRifle1 and Sniper Rifle (author SuperPhat) https://freesound.org/people/SuperPhat/sounds/404562/ and https://freesound.org/people/SuperPhat/sounds/514228/ under CC0 license
+- Rocket Launch (author Jarusca) https://freesound.org/people/Jarusca/sounds/521377/ under CC0 license
+
+This project uses the following Extension Assets from assetstore.unity.com all under Extension Asset License
+- Polygonal Modern Weapons Asset Package (Aligned Games) https://assetstore.unity.com/packages/3d/props/weapons/polygonal-modern-weapons-asset-package-53808
+- Procedural Fire (Hovl Studio) https://assetstore.unity.com/packages/vfx/particles/fire-explosions/procedural-fire-141496
+- Low Poly Street Pack (Dynamic Art) https://assetstore.unity.com/packages/3d/environments/urban/low-poly-street-pack-67475
+- Sherbb's Particle Collection (Sherbb)
+https://assetstore.unity.com/packages/vfx/particles/sherbb-s-particle-collection-170798
+- Simple Health Bar (Spike) https://assetstore.unity.com/packages/tools/gui/simple-healthbars-132547
+- Sci-Fi Soldier (Yurov Viktor) https://assetstore.unity.com/packages/3d/characters/humanoids/sci-fi/sci-fi-soldier-29559
