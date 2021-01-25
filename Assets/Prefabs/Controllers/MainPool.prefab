@@ -47,6 +47,8 @@ MonoBehaviour:
     type: 3}
   phoenixMosquitoPrefab: {fileID: 1729367894079625381, guid: 918521fb8535d77458c3d47c411da725,
     type: 3}
+  bulletMosquitoPrefab: {fileID: 1729367894079625381, guid: f97af0741fbed6d43b60dbee39590c0f,
+    type: 3}
   flamePrefab: {fileID: 2830141959738148096, guid: 92175ea1bbb04144bafd07101053db53,
     type: 3}
   avoidZonePrefab: {fileID: 390126661884607215, guid: 9214b8bc840510246ad8fc42ffaec58b,

@@ -26,16 +26,20 @@ public class OrbitingState : ISubState
     float dragAbsolute = 0.4f;  // Rozamiento
     #endregion
    
-    public OrbitingState(Swarm swarm)
+    public OrbitingState(Swarm swarm, float minIdleTime = 0f)
     {
         mySwarm = swarm;
         swarmMovement = mySwarm.swarmMovement.transform;
         timeElapsed = 0f;
         timeToChangeState += Random.Range(-timeOffset, timeOffset);
+        timeToChangeState += minIdleTime;
     }
 
     #region INHERITED METHODS
-    public void InitState() {}
+    public void InitState() 
+    {
+        mySwarm.SetFormation(Formations.Standard);
+    }
 
     /// <summary>
     /// Calcula el nuevo vector de velocidad y se lo aplica a la posición
@@ -45,7 +49,13 @@ public class OrbitingState : ISubState
         timeElapsed += Time.fixedDeltaTime;
         if (timeElapsed >= timeToChangeState)
         {
-            return new AttackingState(mySwarm);
+            if (Random.Range(0, 1) == 0)
+            {
+                return new SurroundingState(mySwarm);
+            } else
+            {
+                return new AttackingState(mySwarm);
+            }
         }
 
         ApplyDrag();

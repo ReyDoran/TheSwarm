@@ -28,6 +28,7 @@ public class Swarm : MonoBehaviour
     private List<GameObject> mosquitosList;    // Lista de agentes dentro del enjambre (de todos los tipos)
     private List<GameObject> leadersList;   // Lista de líderes
     private List<GameObject> phoenixMosquitosList;  // Lista de mosquitos fénix
+    private List<GameObject> bulletMosquitosList;   // Lista de mosquitos bala
     private Vector2 averagePosition;    // Posición media del cardumen
     private Formations formation;   // Formación del enjambre
     private Transform prey; // Presa del enjambre (jugador)
@@ -40,8 +41,12 @@ public class Swarm : MonoBehaviour
 
     // Ajustes
     private float swarmRadius = 10f;    // Radio del flock (no es el mismo el radio del flock que el radio para captar nuevos mosquitos para el flock)
-    private float baseSwarmSize = 5f;  // Tamaño mínimo del flock
-    private float swarmSizeDivisor = 40f;   // Factor de aumento de tamaño del flock por cada mosquito
+    private float baseSwarmSize = 7.5f;  // Tamaño mínimo del flock
+    private float swarmSizeDivisor = 10f;   // Factor de aumento de tamaño del flock por cada mosquito
+    private float swarmForcesRadiusMultiplier; // Factor de disminución del swarm para los mosquitos
+    private float swarmForcesRadiusMultiplierStandard = 0.5f;    // Valor anterior variable para formación standard
+    private float swarmForcesRadiusMultiplierCircle = 1f;    // Valor anterior variable para formación círculo
+    private float swarmForcesRadiusMultiplierDisperse = 0.8f;    // Valor anterior variable para formación dispersa
     private float perceptionRadiusMultiplier = 4f;  // Multiplicador del radio de la percepción respecto al del enjambre
     private int minAgentsPerFlock = 5; // Mínimo de agentes para ser considerado flock
     private int annexableTreshold = 20;    // Máximo de agentes hasta convertirse en no anexionable
@@ -63,7 +68,8 @@ public class Swarm : MonoBehaviour
         mosquitosList = new List<GameObject>();
         leadersList = new List<GameObject>();
         phoenixMosquitosList = new List<GameObject>();
-        formation = Formations.Standard;
+        bulletMosquitosList = new List<GameObject>();
+        SetFormation(Formations.Standard);
         isReady = false;
         isAnnexable = false;
         isPreyInSight = false;
@@ -212,7 +218,7 @@ public class Swarm : MonoBehaviour
             circleCollider.radius = swarmRadius;
             foreach (GameObject agent in mosquitosList)
             {
-                agent.GetComponent<Mosquito>().mySwarmRadius = swarmRadius;
+                agent.GetComponent<Mosquito>().mySwarmRadius = swarmRadius * swarmForcesRadiusMultiplier;
             }
         }
     }
@@ -260,6 +266,8 @@ public class Swarm : MonoBehaviour
                     foreach (GameObject agent in mosquitosList)
                     {
                         Mosquito mosquito = agent.GetComponent<Mosquito>();
+                        swarmForcesRadiusMultiplier = swarmForcesRadiusMultiplierStandard;
+                        ActualizeFlockRadius();
                         mosquito.SetFormation(formation);
                     }
                     break;
@@ -268,6 +276,8 @@ public class Swarm : MonoBehaviour
                     foreach (GameObject agent in mosquitosList)
                     {
                         Mosquito mosquito = agent.GetComponent<Mosquito>();
+                        swarmForcesRadiusMultiplier = swarmForcesRadiusMultiplierCircle;
+                        ActualizeFlockRadius();
                         mosquito.SetFormation(formation);
                     }
                     break;
@@ -276,6 +286,8 @@ public class Swarm : MonoBehaviour
                     foreach (GameObject agent in mosquitosList)
                     {
                         Mosquito mosquito = agent.GetComponent<Mosquito>();
+                        swarmForcesRadiusMultiplier = swarmForcesRadiusMultiplierDisperse;
+                        ActualizeFlockRadius();
                         mosquito.SetFormation(formation);
                     }
                     break;
@@ -295,6 +307,22 @@ public class Swarm : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Dispara un mosquito bala en caso de disponer de ellos
+    /// </summary>
+    /// <param name="numberOfMosquitos"></param>
+    public void FireBulletMosquito(int numberOfMosquitos = 1)
+    {
+        while(numberOfMosquitos > 0)
+        {
+            if (bulletMosquitosList.Count > 0)
+            {
+                bulletMosquitosList[Random.Range(0, bulletMosquitosList.Count)].GetComponent<BulletMosquito>().Attack();
+            }
+            numberOfMosquitos--;
+        }
+    }
+
 
     /// <summary>
     /// Añade el mosquito nuevo a su lista correspondiente y le settea los parámetros
@@ -307,6 +335,9 @@ public class Swarm : MonoBehaviour
         if (newMosquito.TryGetComponent<PhoenixMosquito>(out PhoenixMosquito newPhoenixMosquito))
         {
             phoenixMosquitosList.Add(newMosquito);
+        } else if (newMosquito.TryGetComponent<BulletMosquito>(out BulletMosquito newBulletMosquito))
+        {
+            bulletMosquitosList.Add(newMosquito);
         }
         mosquitosList.Add(newMosquito);
         if (mosquitosList.Count >= annexableTreshold)
@@ -341,6 +372,9 @@ public class Swarm : MonoBehaviour
         if (removedMosquito.TryGetComponent<PhoenixMosquito>(out PhoenixMosquito newPhoenixMosquito))
         {
             phoenixMosquitosList.Remove(newPhoenixMosquito.gameObject);
+        } else if (removedMosquito.TryGetComponent<BulletMosquito>(out BulletMosquito newBulletMosquito))
+        {
+            bulletMosquitosList.Remove(newBulletMosquito.gameObject);
         }
         mosquitosList.Remove(removedMosquito);
         removedMosquito.transform.SetParent(null);
@@ -386,6 +420,14 @@ public class Swarm : MonoBehaviour
         return averagePosition;
     }
 
+    public Transform GetPrey()
+    {
+        if (prey != null)
+            return prey;
+        else
+            return null;
+    }
+
     public Vector2 GetPreyPosition()
     {
         if (prey != null)
@@ -402,6 +444,11 @@ public class Swarm : MonoBehaviour
     public int GetPhoenixMosquitosCount()
     {
         return phoenixMosquitosList.Count;
+    }
+
+    public int GetBulletMosquitosCount()
+    {
+        return bulletMosquitosList.Count;
     }
 
     public float GetRadius()

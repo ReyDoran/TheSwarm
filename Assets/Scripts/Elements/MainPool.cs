@@ -14,6 +14,7 @@ public class MainPool : MonoBehaviour
     // Referencias
     public GameObject mosquitoPrefab;
     public GameObject phoenixMosquitoPrefab;
+    public GameObject bulletMosquitoPrefab;
     public GameObject flamePrefab;
     public GameObject avoidZonePrefab;
     public GameObject bloodPrefab;
@@ -22,13 +23,15 @@ public class MainPool : MonoBehaviour
     // Estructuras de datos
     private Stack<GameObject> mosquitosPool;
     private Stack<GameObject> phoenixMosquitosPool;
+    private Stack<GameObject> bulletMosquitosPool;
     private Stack<GameObject> flamesPool;
     private Stack<GameObject> avoidZonesPool;
     private Stack<GameObject> bloodPool;
 
     // Pool inicial
     private int initialMosquitoInstances = 500;
-    private int initialPhoenixMosquitoInstances = 500;
+    private int initialPhoenixMosquitoInstances = 50;
+    private int initialBulletMosquitosInstances = 50;
     private int initialFlameInstances = 2;
     private int initialAvoidZoneInstances = 350;
     private int initialBloodInstances = 40;
@@ -49,10 +52,11 @@ public class MainPool : MonoBehaviour
         uIController = FindObjectOfType<UIController>();
         mosquitosPool = new Stack<GameObject>();
         phoenixMosquitosPool = new Stack<GameObject>();
+        bulletMosquitosPool = new Stack<GameObject>();
         flamesPool = new Stack<GameObject>();
         avoidZonesPool = new Stack<GameObject>();
         bloodPool = new Stack<GameObject>();
-        InitPool(initialMosquitoInstances, initialPhoenixMosquitoInstances, initialFlameInstances, initialAvoidZoneInstances, initialBloodInstances);
+        InitPool(initialMosquitoInstances, initialPhoenixMosquitoInstances, initialBulletMosquitosInstances, initialFlameInstances, initialAvoidZoneInstances, initialBloodInstances);
     }
     #endregion UNITY CALLBACKS
 
@@ -65,7 +69,7 @@ public class MainPool : MonoBehaviour
     /// <param name="numberOfFlames"></param>
     /// <param name="numberOfAvoidZones"></param>
     /// <param name="numberOfBlood"></param>
-    private void InitPool(int numberOfMosquitos, int numberOfPhoenixMosquitos, int numberOfFlames, int numberOfAvoidZones, int numberOfBlood)
+    private void InitPool(int numberOfMosquitos, int numberOfPhoenixMosquitos, int numberOfBulletMosquitos, int numberOfFlames, int numberOfAvoidZones, int numberOfBlood)
     {
         for (int i = 0; i < numberOfMosquitos; i++)
         {
@@ -80,6 +84,13 @@ public class MainPool : MonoBehaviour
             newPhoenixMosquito.GetComponent<Mosquito>().mainPool = this;
             newPhoenixMosquito.SetActive(false);
             phoenixMosquitosPool.Push(newPhoenixMosquito);
+        }
+        for (int i = 0; i < numberOfBulletMosquitos; i++)
+        {
+            GameObject newBulletMosquito = Instantiate(bulletMosquitoPrefab, instantiatePosition, Quaternion.identity);
+            newBulletMosquito.GetComponent<Mosquito>().mainPool = this;
+            newBulletMosquito.SetActive(false);
+            bulletMosquitosPool.Push(newBulletMosquito);
         }
         for (int i = 0; i < numberOfFlames; i++)
         {
@@ -162,6 +173,24 @@ public class MainPool : MonoBehaviour
     }
 
     /// <summary>
+    /// Devuelve un mosquito bala
+    /// </summary>
+    /// <returns></returns>
+    public GameObject GetBulletMosquito()
+    {
+        if (bulletMosquitosPool.Count > 0)
+        {
+            return bulletMosquitosPool.Pop();
+        }
+        else
+        {
+            GameObject newBulletMosquito = Instantiate(bulletMosquitoPrefab);
+            newBulletMosquito.GetComponent<BulletMosquito>().mainPool = this;
+            return newBulletMosquito;
+        }
+    }
+
+    /// <summary>
     /// Devuelve una llama
     /// </summary>
     /// <returns></returns>
@@ -233,6 +262,16 @@ public class MainPool : MonoBehaviour
     {
         phoenixMosquito.SetActive(false);
         phoenixMosquitosPool.Push(phoenixMosquito);
+    }
+
+    /// <summary>
+    /// Desactiva y almacena el mosquito bala en el pool
+    /// </summary>
+    /// <param name="mosquito"></param>
+    public void AddBulletMosquito(GameObject bulletMosquito)
+    {
+        bulletMosquito.SetActive(false);
+        bulletMosquitosPool.Push(bulletMosquito);
     }
 
     /// <summary>

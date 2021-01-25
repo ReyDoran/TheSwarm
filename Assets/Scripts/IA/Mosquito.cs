@@ -16,7 +16,7 @@ public class Mosquito : MonoBehaviour
     // 1) Referencias
     private Transform transform;
     protected Rigidbody2D rigidbody;
-    private Transform meshTransform;
+    protected Transform meshTransform;
     private CircleCollider2D circleCollider;
     public MainPool mainPool; // Referencia al pool de mosquitos para los mosquitos eliminados
 
@@ -32,9 +32,9 @@ public class Mosquito : MonoBehaviour
     public bool isDead = false; // Está muerto?
     public bool isBurning = false;  // Está ardiendo el mosquito?
     public bool isFlocking = false; // Está dentro de un enjambre?
-    private bool avoidRequested = false; // Está dentro de una avoidZone?
-    private GameObject myFlame;
-    private GameObject myAvoidZone; // Zona de evitar de mosquitos asociado a la llama
+    protected bool avoidRequested = false; // Está dentro de una avoidZone?
+    protected GameObject myFlame;
+    protected GameObject myAvoidZone; // Zona de evitar de mosquitos asociado a la llama
     public MosquitoAvoidZone myLeaderZone;  // Zona de atracción de líder de escuadrón (ya sea el líder o seguidor)
     public int damage = 1;  // Daño al colisionar
 
@@ -43,9 +43,10 @@ public class Mosquito : MonoBehaviour
     protected float cohesionForceModifier = 11f;   // Multiplicador de fuerza de cohesión
     private float proximityCohesionModifier = 0.3f; // Multiplicador de la reducción de la fuerza de cohesión en función de la distancia al centro (-0.9 fuerza máxima en el borde, 1 siempre máxima fuerza)
     private float proximityCohesionModifierStandard = 0.4f; // Valor del multiplicador anterior en caso de formación standard
+    private float proximityCohesionModifierCircle = 0.1f; // Valor del multiplicador anterior en caso de formación círculo
     private float proximityCohesionModifierDisperse = -0.1f;    // Valor del multiplicador anterior en caso de formación dispersa
     private float circleCohesionForceModifier = 10f; // Multiplicador del aumento de fuerza de cohesión para la formación círculo
-    private float radiusPercentage = 0.2f;   // Porcentaje del radio del flock que ocuparán los mosquitos
+    private float radiusPercentage = 0.2f;   // Porcentaje del radio del flock que ocuparán los mosquitos (0.2f)
     private float avoidForceModifier = 20f;     // Multiplicador de fuerza de evasión
     private float randomForceModifier = 7f;    // Multiplicador de fuerza aleatoria
     private float randomForceZModifier = 2f; // Mulitplicador de velocidad aleatoria en el eje Z
@@ -64,7 +65,7 @@ public class Mosquito : MonoBehaviour
     #endregion VARIABLES
 
     #region UNITY CALLBACKS
-    private void Awake()
+    protected void Awake()
     {
         burningTime = Random.Range(2f, 4f);
         transform = GetComponent<Transform>();
@@ -75,7 +76,7 @@ public class Mosquito : MonoBehaviour
         formation = Formations.Standard;
     }
 
-    private void OnEnable()
+    protected void OnEnable()
     {
         transform.SetParent(null);
     }
@@ -128,9 +129,11 @@ public class Mosquito : MonoBehaviour
         formation = newFormation;
         switch (formation)
         {
-            case Formations.Circle:
             case Formations.Standard:
                 proximityCohesionModifier = proximityCohesionModifierStandard;
+                break;
+            case Formations.Circle:
+                proximityCohesionModifier = proximityCohesionModifierCircle;
                 break;
             case Formations.Disperse:
                 proximityCohesionModifier = proximityCohesionModifierDisperse;
@@ -141,7 +144,7 @@ public class Mosquito : MonoBehaviour
     /// <summary>
     /// Mata el mosquito, lo elimina del flock y lo desactiva
     /// </summary>
-    public void Kill()
+    public virtual void Kill()
     {
         if (isFlocking)
         {
@@ -188,10 +191,10 @@ public class Mosquito : MonoBehaviour
     /// Sirve para que las avoidZones le indiquen hacia dónde escapar
     /// </summary>
     /// <param name="direction"></param>
-    public void Avoid(Vector2 direction)
+    public void Avoid(Vector2 direction, float extraForce = 1.0f)
     {
         avoidRequested = true;
-        avoidForce = direction * avoidForceModifier;
+        avoidForce = direction * avoidForceModifier * extraForce;
     }
 
     /// <summary>
@@ -256,7 +259,7 @@ public class Mosquito : MonoBehaviour
 
             case Formations.Circle:
                 cohesionForce = mySwarm.GetFlockPosition() - myPosition;    // Calculamos vector distancia
-                proximity = Mathf.Clamp(cohesionForce.magnitude / mySwarmRadius, 0f, 1f);   // Aplica un porcentaje dependiendo de lo lejos que esté del centro del cardumen
+                proximity = Mathf.Clamp(cohesionForce.magnitude / mySwarmRadius + proximityCohesionModifier, 0f, 1f);   // Aplica un porcentaje dependiendo de lo lejos que esté del centro del cardumen
                 proximity -= (1 - radiusPercentage);
                 Mathf.Clamp(proximity, -radiusPercentage, radiusPercentage);
                 cohesionForce.Normalize();

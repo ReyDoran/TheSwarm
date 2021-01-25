@@ -20,6 +20,28 @@ public class PhoenixMosquito : Mosquito
     #endregion
 
     #region OVERRIDES
+    private new void OnEnable()
+    {
+        base.OnEnable();
+        isFrontline = false;
+    }
+
+    /// <summary>
+    /// Mata el mosquito, lo elimina del flock y lo desactiva
+    /// </summary>
+    public override void Kill()
+    {
+        if (isFlocking)
+        {
+            mySwarm.RemoveAgent(gameObject);
+            isFlocking = false;
+        }
+        mainPool.AddPhoenixMosquito(gameObject);
+        isDead = true;
+        mainPool.RequestBlood(meshTransform.position);
+        gameObject.SetActive(false);
+    }
+
     public override bool Burn()
     {
         return false;

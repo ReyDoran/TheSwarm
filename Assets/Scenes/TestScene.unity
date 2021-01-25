@@ -1637,7 +1637,7 @@ PrefabInstance:
     - target: {fileID: 5031687282288830879, guid: 25c6944694da729448d259d37a19a6b5,
         type: 3}
       propertyPath: numberOfInstances
-      value: 40
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 5031687282288830879, guid: 25c6944694da729448d259d37a19a6b5,
         type: 3}
@@ -1686,6 +1686,11 @@ PrefabInstance:
         type: 3}
       propertyPath: mosquitoFrecuency
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5031687282288830879, guid: 25c6944694da729448d259d37a19a6b5,
+        type: 3}
+      propertyPath: bulletMosquitoFrecuency
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5987484344445616447, guid: 25c6944694da729448d259d37a19a6b5,
         type: 3}
@@ -2777,7 +2782,7 @@ PrefabInstance:
     - target: {fileID: 2356984654959147257, guid: 25c6944694da729448d259d37a19a6b5,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5031687282288830879, guid: 25c6944694da729448d259d37a19a6b5,
         type: 3}

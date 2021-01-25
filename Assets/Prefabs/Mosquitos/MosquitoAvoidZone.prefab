@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3162618127882032828}
   - component: {fileID: 7782611436981880049}
   - component: {fileID: -4527006573774162913}
+  - component: {fileID: 2439469617534538122}
   m_Layer: 12
   m_Name: MosquitoAvoidZone
   m_TagString: Untagged
@@ -60,4 +61,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d5f96447d05cf1439d82ee5932b6ac3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
+  mainPool: {fileID: 0}
+--- !u!50 &2439469617534538122
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390126661884607215}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

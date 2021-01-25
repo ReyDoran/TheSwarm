@@ -40,6 +40,7 @@ public class HuntingState : IState
         {
             mySubStateAux.EndState();
             mySubState.InitState();
+            mySubStateAux = mySubState;
         }
     }
 

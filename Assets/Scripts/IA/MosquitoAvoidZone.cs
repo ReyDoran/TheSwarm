@@ -25,20 +25,25 @@ public class MosquitoAvoidZone : MonoBehaviour
     private bool isAttractZone = false;
     private int maxFollowers;
     private int followers = 0;
+    private bool isStrong;  // Es de tipo fuerte?
+    private float extraForce; // Fuerza extra a aplicar
     #endregion
 
     #region UNITY CALLBACKS
     private void Awake()
     {
         mosquitosList = new List<Mosquito>();
+        isStrong = false;
     }
 
     private void OnEnable()
     {
         mosquitosList.Clear();
         isAttractZone = false;
+        isStrong = false;
         followers = 0;
     }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (isAttractZone && followers < maxFollowers && !collision.gameObject.GetComponent<Mosquito>().isLeader && !collision.gameObject.GetComponent<Mosquito>().isFollower)
@@ -69,7 +74,7 @@ public class MosquitoAvoidZone : MonoBehaviour
         {
             Vector2 direction = new Vector2(mosquito.transform.position.x - transform.position.x, mosquito.transform.position.y - transform.position.y);
             if (!isAttractZone)
-                mosquito.Avoid(direction);
+                mosquito.Avoid(direction, extraForce);
             else
             {
                 mosquito.Avoid(-direction);
@@ -86,6 +91,7 @@ public class MosquitoAvoidZone : MonoBehaviour
     {
         GetComponent<CircleCollider2D>().radius = defaultRadius;
         followers = 0;
+        transform.SetParent(null);
         mainPool.AddAvoidZone(gameObject);
     }
 
@@ -94,10 +100,20 @@ public class MosquitoAvoidZone : MonoBehaviour
     /// Se sitúa en su posición y lo sigue
     /// </summary>
     /// <param name="target"></param>
-    public void SetTarget(Transform target)
+    public void SetTarget(Transform target, float forceApplied = 1f)
     {
         transform.position = target.position;
         transform.SetParent(target);
+        extraForce = forceApplied;
+    }
+
+    /// <summary>
+    /// Se destruye (vuelve a la pool) en X segundos
+    /// </summary>
+    /// <param name="timeToReturn"></param>
+    public void ReturnToPoolDelayed(float timeToReturn)
+    {
+        Invoke(nameof(ReturnToPool), timeToReturn);
     }
 
     /// <summary>

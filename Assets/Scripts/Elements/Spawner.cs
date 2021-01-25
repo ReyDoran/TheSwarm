@@ -16,6 +16,8 @@ public class Spawner : MonoBehaviour
     public int mosquitoFrecuency;   // Frecuencia de aparición
     public GameObject phoenixMosquito;  // Prefab mosquito fénix
     public int phoenixMosquitoFrecuency;
+    public GameObject bulletMosquito;
+    public int bulletMosquitoFrecuency;
 
     public MainPool mainPool;   // Pool de la escena
 
@@ -37,9 +39,10 @@ public class Spawner : MonoBehaviour
     private void Awake()
     {
         spawnTimer = 0f;
-        frecuencies = new int[2];
+        frecuencies = new int[3];
         frecuencies[0] = mosquitoFrecuency;
         frecuencies[1] = phoenixMosquitoFrecuency;
+        frecuencies[2] = bulletMosquitoFrecuency;
     }
 
     // Para testeo
@@ -73,7 +76,7 @@ public class Spawner : MonoBehaviour
 
     private GameObject GetRandomMosquito()
     {
-        int total = mosquitoFrecuency + phoenixMosquitoFrecuency;
+        int total = mosquitoFrecuency + phoenixMosquitoFrecuency + bulletMosquitoFrecuency;
         int randomIndex = Random.Range(0, total) + 1;
         int iteration = -1;
         do
@@ -90,6 +93,9 @@ public class Spawner : MonoBehaviour
                 break;
             case 1:
                 mosquito = mainPool.GetPhoenixMosquito();
+                break;
+            case 2:
+                mosquito = mainPool.GetBulletMosquito();
                 break;
         }
         return mosquito;
