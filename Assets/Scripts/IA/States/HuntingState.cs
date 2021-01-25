@@ -10,7 +10,8 @@ public class HuntingState : IState
 {
     #region VARIABLES
     Swarm mySwarm;
-    IState mySubState;
+    ISubState mySubState;
+    ISubState mySubStateAux;
     #endregion
 
     public HuntingState(Swarm swarm)
@@ -25,6 +26,7 @@ public class HuntingState : IState
     public void InitState()
     {
         mySubState = new OrbitingState(mySwarm);
+        mySubStateAux = mySubState;
         mySubState.InitState();
     }
 
@@ -33,7 +35,12 @@ public class HuntingState : IState
     /// </summary>
     public void ExecuteState()
     {
-        mySubState.ExecuteState();
+        mySubState = mySubState.ExecuteState();
+        if (!mySubState.Equals(mySubStateAux))
+        {
+            mySubStateAux.EndState();
+            mySubState.InitState();
+        }
     }
 
     /// <summary>

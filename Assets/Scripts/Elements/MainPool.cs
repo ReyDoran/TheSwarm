@@ -35,6 +35,9 @@ public class MainPool : MonoBehaviour
 
     // Límites (no deben ser inferiores a los valores iniciales)
     private const int MAX_BLOOD_INSTANCES = 40;
+
+    // Otros
+    private Vector3 instantiatePosition = new Vector3(-10000f, -10000f, 0);
     #endregion VARIABLES
 
     #region UNITY CALLBACKS
@@ -66,14 +69,14 @@ public class MainPool : MonoBehaviour
     {
         for (int i = 0; i < numberOfMosquitos; i++)
         {
-            GameObject newMosquito = Instantiate(mosquitoPrefab);
+            GameObject newMosquito = Instantiate(mosquitoPrefab, instantiatePosition, Quaternion.identity);
             newMosquito.GetComponent<Mosquito>().mainPool = this;
             newMosquito.SetActive(false);
             mosquitosPool.Push(newMosquito);
         }
         for (int i = 0; i < numberOfPhoenixMosquitos; i++)
         {
-            GameObject newPhoenixMosquito = Instantiate(phoenixMosquitoPrefab);
+            GameObject newPhoenixMosquito = Instantiate(phoenixMosquitoPrefab, instantiatePosition, Quaternion.identity);
             newPhoenixMosquito.GetComponent<Mosquito>().mainPool = this;
             newPhoenixMosquito.SetActive(false);
             phoenixMosquitosPool.Push(newPhoenixMosquito);

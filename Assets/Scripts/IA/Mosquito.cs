@@ -80,6 +80,14 @@ public class Mosquito : MonoBehaviour
         transform.SetParent(null);
     }
 
+    private void OnDisable()
+    {
+        if (isFlocking)
+        {
+            mySwarm.RemoveAgent(gameObject);
+        }
+    }
+
     /// <summary>
     /// Llama a las funciones de movimiento
     /// </summary>

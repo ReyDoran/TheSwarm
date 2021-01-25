@@ -35,17 +35,20 @@ public class Swarm : MonoBehaviour
 
     private bool isReady;   // Está lista? (tiene el nº mínimo de agentes para considerarse flock)
     public bool isAnnexable;    // Se puede anexionar?
+    public bool isAnnexionating;     // Está anexionando?
     public bool isPreyInSight;  // Tiene presa a la vista?
 
     // Ajustes
     private float swarmRadius = 10f;    // Radio del flock (no es el mismo el radio del flock que el radio para captar nuevos mosquitos para el flock)
     private float baseSwarmSize = 5f;  // Tamaño mínimo del flock
     private float swarmSizeDivisor = 40f;   // Factor de aumento de tamaño del flock por cada mosquito
-    private float perceptionRadiusMultiplier = 3f;  // Multiplicador del radio de la percepción respecto al del enjambre
-    private int minAgentsPerFlock = 10; // Mínimo de agentes para ser considerado flock
-    private int annexableTreshold = 100;    // Máximo de agentes hasta convertirse en no anexionable
+    private float perceptionRadiusMultiplier = 4f;  // Multiplicador del radio de la percepción respecto al del enjambre
+    private int minAgentsPerFlock = 5; // Mínimo de agentes para ser considerado flock
+    private int annexableTreshold = 20;    // Máximo de agentes hasta convertirse en no anexionable
+    private float timesBiggerToAnnex = 3f;    // nº de veces más grande (en nº de unidades) para que un enjambre anexione a otro
 
     // Controles para los estados
+    public GameObject swarmMovementPrefab;
     public GameObject swarmMovement;    // A través de swarmMovement puede mover la posición y rotación del flock directamente
     
     #endregion VARIABLES
@@ -62,9 +65,9 @@ public class Swarm : MonoBehaviour
         phoenixMosquitosList = new List<GameObject>();
         formation = Formations.Standard;
         isReady = false;
-        isAnnexable = true;
+        isAnnexable = false;
         isPreyInSight = false;
-        swarmMovement = new GameObject();
+        swarmMovement = Instantiate(swarmMovementPrefab, transform.position, Quaternion.identity);
         myState = new WanderingState(this);
     }
 
@@ -88,26 +91,27 @@ public class Swarm : MonoBehaviour
     {
         if (collision.gameObject.tag.Equals("Mosquito"))
         {
-            AddAgent(collision.gameObject);
+            if (!collision.gameObject.GetComponent<Mosquito>().isFlocking)
+                AddAgent(collision.gameObject);
         }
         else if (collision.gameObject.tag.Equals("Flock"))
         {
             if (this.GetInstanceID() > collision.gameObject.GetInstanceID())
             {
                 Swarm otherFlock = collision.gameObject.GetComponent<Swarm>();
-                if (GetAgentsCount() > otherFlock.GetAgentsCount() && otherFlock.isAnnexable)
+                if (GetAgentsCount() > otherFlock.GetAgentsCount() * timesBiggerToAnnex && otherFlock.isAnnexable)
                 {
                     List<GameObject> otherFlockAgents = otherFlock.GetAllAgents();
                     while (otherFlockAgents.Count > 0)
                     {
-                        AddAgent(otherFlock.RemoveAgent(otherFlockAgents[0]));
+                        AddAgent(otherFlock.RemoveAgent(otherFlockAgents[0], false));
                     }
                 }
-                else if (isAnnexable)
+                else if (GetAgentsCount() < otherFlock.GetAgentsCount() * timesBiggerToAnnex && isAnnexable)
                 {
                     while (mosquitosList.Count > 0)
                     {
-                        otherFlock.AddAgent(RemoveAgent(mosquitosList[0]));
+                        otherFlock.AddAgent(RemoveAgent(mosquitosList[0], false));
                     }
                 }
             }
@@ -159,18 +163,21 @@ public class Swarm : MonoBehaviour
     /// </summary>
     private void CalculateAveragePosition()
     {
-        averagePosition = transform.position;
+        averagePosition = Vector2.zero;
         if (mosquitosList.Count > 0)
         {
             foreach (GameObject agent in mosquitosList)
             {
                 if (!agent.GetComponent<Mosquito>().isDead)
                 {
-                    averagePosition += new Vector2(agent.GetComponent<Transform>().position.x, agent.GetComponent<Transform>().position.y);
+                    averagePosition += new Vector2(agent.transform.position.x, agent.transform.position.y);
                 }
             }
             averagePosition = averagePosition / mosquitosList.Count;
-        }    
+        } else
+        {
+            averagePosition = transform.position;
+        }
     }
 
     /// <summary>
@@ -195,7 +202,7 @@ public class Swarm : MonoBehaviour
     /// <param name="gameObject"></param>
     private void ActualizeFlockRadius(bool destroyAuthorization = false)
     {
-        if (destroyAuthorization && mosquitosList.Count < minAgentsPerFlock)
+        if (destroyAuthorization && mosquitosList.Count < minAgentsPerFlock || mosquitosList.Count == 0)
         {
             DestroyFlock();
         } else
@@ -224,6 +231,7 @@ public class Swarm : MonoBehaviour
                 mosquitosList.Remove(agent);
             }
         }
+        Destroy(swarmMovement);
         Destroy(gameObject);
     }
 
@@ -243,7 +251,6 @@ public class Swarm : MonoBehaviour
     /// </summary>
     public void SetFormation(Formations newFormation)
     {
-        Debug.Log(newFormation);
         if (!formation.Equals(newFormation))
         {
             formation = newFormation;
@@ -295,7 +302,7 @@ public class Swarm : MonoBehaviour
     /// </summary>
     /// <param name="newMosquito"></param>
     public void AddAgent(GameObject newMosquito)
-    {
+    {        
         SetMosquitoValues(newMosquito.GetComponent<Mosquito>());
         if (newMosquito.TryGetComponent<PhoenixMosquito>(out PhoenixMosquito newPhoenixMosquito))
         {
@@ -321,21 +328,28 @@ public class Swarm : MonoBehaviour
     }
 
     /// <summary>
-    /// Elimina agente del cardumen
+    /// Elimina agente del cardumen, siempre que sea el dueño
+    /// El segundo parámetro indica si se puede deshacer el flock (en caso de que esté inicializado)
     /// </summary>
     /// <param name="removedMosquito"></param>
     /// <returns></returns>
-    public GameObject RemoveAgent(GameObject removedMosquito)
+    public GameObject RemoveAgent(GameObject removedMosquito, bool destroyAuthorization = true)
     {
+        if (!this.Equals(removedMosquito.GetComponent<Mosquito>().mySwarm))
+            return removedMosquito;
         removedMosquito.GetComponent<Mosquito>().RemoveFlock();
         if (removedMosquito.TryGetComponent<PhoenixMosquito>(out PhoenixMosquito newPhoenixMosquito))
         {
             phoenixMosquitosList.Remove(newPhoenixMosquito.gameObject);
         }
         mosquitosList.Remove(removedMosquito);
+        removedMosquito.transform.SetParent(null);
         if (mosquitosList.Count < annexableTreshold)
             isAnnexable = true;
-        ActualizeFlockRadius(true);
+        if (isReady && destroyAuthorization)
+            ActualizeFlockRadius(true);
+        else
+            ActualizeFlockRadius();
         return removedMosquito;
     }
 

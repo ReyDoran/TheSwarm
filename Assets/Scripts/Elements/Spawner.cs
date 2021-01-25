@@ -46,7 +46,7 @@ public class Spawner : MonoBehaviour
     void Start()
     {
         SpawnMosquitosDelayed(numberOfInstances);
-        Invoke("ActivateFlock", 2);
+        Invoke("ActivateFlock", 1f);
     }
 
     void Update()
@@ -63,7 +63,6 @@ public class Spawner : MonoBehaviour
     #region PRIVATE METHODS
     private void SpawnMosquito(Vector2 position, float maxOffsetX, float maxOffsetY)
     {
-        Debug.Log(position);
         float offsetX = Random.Range(-maxOffsetX / 2, maxOffsetX / 2);
         float offsetY = Random.Range(-maxOffsetY / 2, maxOffsetY / 2);
         Mosquito mosquito = GetRandomMosquito().GetComponent<Mosquito>();

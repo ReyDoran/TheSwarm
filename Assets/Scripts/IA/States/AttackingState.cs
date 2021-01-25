@@ -2,12 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Subestado de caza
-/// Orbita al rededor de la presa
-/// Sirve para darle descanso al jugador
-/// </summary>
-public class OrbitingState : ISubState
+public class AttackingState : ISubState
 {
     #region VARIABLES
     Swarm mySwarm;
@@ -16,47 +11,39 @@ public class OrbitingState : ISubState
     float timeElapsed;
 
     // Ajustes
-    float timeToChangeState = 3.0f; // Tiempo base para generar un cambio de estado
-    float timeOffset = 2.0f;    // Tiempo a restar o añadir al anterior de manera aleatoria
+    float maxTimeAttacking = 2f;
     // Ajustes de movimiento
-    float orbitRadius = 26f;    // Radio de la órbita (el enjambre se coloca en la mitad
-    float orbitForce = 30f;     // Fuerza de órbita
-    float maxVelocity = 15f;    // Velocidad máxima de órbita
-    float minProximityPercentageTreshold = 0.1f;    // Rango en el que no se aplican fuerzas (desde la mitad hacia fuera y dentro)
-    float dragAbsolute = 0.4f;  // Rozamiento
+    float dragAbsolute = 0.05f;
+    float maxForce = 60f;
+    float maxVelocity = 25f;
     #endregion
-   
-    public OrbitingState(Swarm swarm)
+
+    public AttackingState(Swarm swarm)
     {
         mySwarm = swarm;
         swarmMovement = mySwarm.swarmMovement.transform;
+        currentVelocity = Vector2.zero;
         timeElapsed = 0f;
-        timeToChangeState += Random.Range(-timeOffset, timeOffset);
     }
 
-    #region INHERITED METHODS
+    #region INHERITED METHODS   
     public void InitState() {}
 
-    /// <summary>
-    /// Calcula el nuevo vector de velocidad y se lo aplica a la posición
-    /// </summary>
     public ISubState ExecuteState()
     {
         timeElapsed += Time.fixedDeltaTime;
-        if (timeElapsed >= timeToChangeState)
-        {
-            return new AttackingState(mySwarm);
-        }
+        if (timeElapsed >= maxTimeAttacking)
+            return new OrbitingState(mySwarm);
 
         ApplyDrag();
-        ApplyOrbitForce();
+        ApplyAttackForce();
         ApplyCaps();
         swarmMovement.position = (Vector2)swarmMovement.position + currentVelocity * Time.fixedDeltaTime;
 
         return this;
     }
 
-    void IState.ExecuteState() 
+    void IState.ExecuteState()
     {
         throw new System.NotImplementedException();
     }
@@ -89,18 +76,14 @@ public class OrbitingState : ISubState
     }
 
     /// <summary>
-    /// Aplica fuerza de órbita a currentVelocity
+    /// Aplica fuerza de ataque a currentVelocity
     /// </summary>
-    private void ApplyOrbitForce()
+    private void ApplyAttackForce()
     {
         Vector2 force = mySwarm.GetPreyPosition() - (Vector2)mySwarm.transform.position;
-        float proximity = Mathf.Clamp(force.magnitude / orbitRadius, 0f, 1f);
-        proximity -= 0.5f;
-        if (Mathf.Abs(proximity) < minProximityPercentageTreshold)
-            proximity = 0f;
-        force.Normalize();
-        force *= proximity;
-        currentVelocity += force * orbitForce;
+        force = Vector2.ClampMagnitude(force, maxForce);
+        force *= 1 / force.magnitude;
+        currentVelocity += force;
     }
 
     /// <summary>
