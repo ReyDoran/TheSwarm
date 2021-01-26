@@ -4,6 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Estado de vagar
+/// Estado inicial
 /// Tiene movimiento aleatorio
 /// </summary>
 public class WanderingState : IState

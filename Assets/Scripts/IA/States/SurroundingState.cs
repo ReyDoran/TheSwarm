@@ -20,15 +20,17 @@ public class SurroundingState : ISubState
     private float timeElapsed;  // Tiempo desde el inicio del estado
 
     // Ajustes
-    private float maxDuration = 20.0f;
-    private float preyAvoidZoneRadius = 3f;
-    private float preyAvoidZoneForce = 8.5f;
+    private float minBulletsToExecute = 5;
+    private float maxDuration = 13.0f;
+    private float preyAvoidZoneRadius = 5.2f;
+    private float preyAvoidZoneForce = 3f;
     float dragAbsolute = 0.6f;
-    float maxForce = 30f;
-    float maxVelocity = 30f;
+    float maxForce = 18f;
+    float maxVelocity = 25f;
     float distanceToStart = 2.5f;   // Distancia a la presa del flock para considerar el comienzo del ataque
 
     // Ajustes ataques
+    private int maxMosquitosPerAttack = 3;
     private float timeToNextAttack = 0f;
     private float timeBetweenAttacks = 2.0f;    // Tiempo base entre ataques
     private float timeOffsetAttacks = 1.0f;    // Cantidad que puede variar (aleatoriamente) el tiempo entre ataques
@@ -64,7 +66,7 @@ public class SurroundingState : ISubState
         } else
         {
             // Frena si está en movimiento
-            dragAbsolute = 0.1f;
+            dragAbsolute = 0.2f;
             ApplyDrag();
             swarmMovement.position = (Vector2)swarmMovement.position + currentVelocity * Time.fixedDeltaTime;
 
@@ -74,7 +76,7 @@ public class SurroundingState : ISubState
             {
                 timeElapsedAttack = 0;
                 timeToNextAttack = timeBetweenAttacks + Random.Range(-timeOffsetAttacks, timeOffsetAttacks);
-                mySwarm.FireBulletMosquito();
+                mySwarm.FireBulletMosquito(Random.Range(0, maxMosquitosPerAttack) + 1);
             }
 
             // Comprueba si debe terminar por tiempo
@@ -82,6 +84,18 @@ public class SurroundingState : ISubState
             if(timeElapsed >= maxDuration)
             {
                 return new OrbitingState(mySwarm, 4.0f);
+            }
+
+            // Comprueba si debe terminar por enemigo fuera del círculo
+            if (Vector2.Distance(mySwarm.GetPreyPosition(), mySwarm.GetFlockPosition()) > mySwarm.GetRadius())
+            {
+                return new OrbitingState(mySwarm);
+            }
+
+            // Comprueba si debe terminar por pocos mosquitos bala
+            if (mySwarm.GetBulletMosquitosCount() < minBulletsToExecute)
+            {
+                return new OrbitingState(mySwarm);
             }
         }
         return this;
@@ -92,17 +106,33 @@ public class SurroundingState : ISubState
         throw new System.NotImplementedException();
     }
 
-    public IState ProcessData(bool preyInSight)
+    IState IState.ProcessData(bool preyInSight)
     {
         throw new System.NotImplementedException();
     }
 
-    public IState ProcessData(Weapons preyWeapon)
+    IState IState.ProcessData(Weapons preyWeapon)
     {
         throw new System.NotImplementedException();
     }
 
-    public IState ProcessData(int mosquitosCount)
+    IState IState.ProcessData(int mosquitosCount)
+    {
+        throw new System.NotImplementedException();
+    }
+
+
+    public ISubState ProcessData(bool preyInSight)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public ISubState ProcessData(Weapons preyWeapon) 
+    {
+        return this;
+    }
+
+    public ISubState ProcessData(int mosquitosCount)
     {
         throw new System.NotImplementedException();
     }

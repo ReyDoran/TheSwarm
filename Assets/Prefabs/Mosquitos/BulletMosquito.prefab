@@ -107,7 +107,7 @@ Transform:
   m_GameObject: {fileID: 1729367894079625381}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.6, y: 1.6, z: 1.6}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 6818158639370055773}
   m_Father: {fileID: 0}
@@ -136,6 +136,8 @@ MonoBehaviour:
   isFlocking: 0
   myLeaderZone: {fileID: 0}
   damage: 1
+  defaultMaterial: {fileID: 2100000, guid: cc5173eee445bcf49a27b48ce2cb3ad6, type: 2}
+  lightedMaterial: {fileID: 2100000, guid: a038f1ee539d0d44b906d23920b95fcf, type: 2}
 --- !u!58 &7748028438274324301
 CircleCollider2D:
   m_ObjectHideFlags: 0

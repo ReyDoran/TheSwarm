@@ -35,13 +35,7 @@ public class HuntingState : IState
     /// </summary>
     public void ExecuteState()
     {
-        mySubState = mySubState.ExecuteState();
-        if (!mySubState.Equals(mySubStateAux))
-        {
-            mySubStateAux.EndState();
-            mySubState.InitState();
-            mySubStateAux = mySubState;
-        }
+        CheckSubStateChange(mySubState.ExecuteState());
     }
 
     /// <summary>
@@ -65,22 +59,14 @@ public class HuntingState : IState
     /// <returns></returns>
     public IState ProcessData(Weapons preyWeapon)
     {
-        if (preyWeapon.Equals(Weapons.Flamethrower))
-        {
-            mySwarm.SetFlamesDefense(true);
-            mySwarm.SetFormation(Formations.Disperse);
-        }
-        else
-        {
-            mySwarm.SetFlamesDefense(false);
-            mySwarm.SetFormation(Formations.Standard);
-        }
+        CheckSubStateChange(mySubState.ProcessData(preyWeapon));
         return this;
     }
 
     public IState ProcessData(int mosquitosCount)
     {
-        throw new System.NotImplementedException();
+        CheckSubStateChange(mySubState.ProcessData(mosquitosCount));
+        return this;
     }
 
     /// <summary>
@@ -89,6 +75,22 @@ public class HuntingState : IState
     public void EndState()
     {
         mySubState.EndState();
+    }
+    #endregion
+
+    #region PRIVATE METHODS
+    /// <summary>
+    /// Comprueba si ha habido un cambio de estado y ejecuta las órdenes necesarias en tal caso
+    /// </summary>
+    private void CheckSubStateChange(ISubState newState)
+    {
+        mySubState = newState;
+        if (!mySubState.Equals(mySubStateAux))
+        {
+            mySubStateAux.EndState();
+            mySubState.InitState();
+            mySubStateAux = mySubState;
+        }
     }
     #endregion
 }

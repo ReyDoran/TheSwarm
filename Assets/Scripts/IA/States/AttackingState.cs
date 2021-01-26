@@ -11,11 +11,11 @@ public class AttackingState : ISubState
     float timeElapsed;
 
     // Ajustes
-    float maxTimeAttacking = 2f;
+    float maxTimeAttacking = 1.8f;
     // Ajustes de movimiento
     float dragAbsolute = 0.05f;
     float maxForce = 60f;
-    float maxVelocity = 25f;
+    float maxVelocity = 28f;
     #endregion
 
     public AttackingState(Swarm swarm)
@@ -40,6 +40,11 @@ public class AttackingState : ISubState
         ApplyCaps();
         swarmMovement.position = (Vector2)swarmMovement.position + currentVelocity * Time.fixedDeltaTime;
 
+        if (mySwarm.isInFlames <= 3)
+            mySwarm.SetFormation(Formations.Standard);
+        else
+            mySwarm.SetFormation(Formations.Disperse);
+
         return this;
     }
 
@@ -48,17 +53,40 @@ public class AttackingState : ISubState
         throw new System.NotImplementedException();
     }
 
-    public IState ProcessData(bool preyInSight)
+    IState IState.ProcessData(bool preyInSight)
     {
         throw new System.NotImplementedException();
     }
 
-    public IState ProcessData(Weapons preyWeapon)
+    IState IState.ProcessData(Weapons preyWeapon)
     {
         throw new System.NotImplementedException();
     }
 
-    public IState ProcessData(int mosquitosCount)
+    IState IState.ProcessData(int mosquitosCount)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public ISubState ProcessData(bool preyInSight)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public ISubState ProcessData(Weapons preyWeapon)
+    {
+        if (preyWeapon.Equals(Weapons.Flamethrower))
+        {
+            mySwarm.SetFlamesDefense(true);
+        }
+        else
+        {
+            mySwarm.SetFlamesDefense(false);
+        }
+        return this;
+    }
+
+    public ISubState ProcessData(int mosquitosCount)
     {
         throw new System.NotImplementedException();
     }

@@ -9,12 +9,16 @@ using UnityEngine;
 public class BulletMosquito : Mosquito
 {
     #region VARIABLES
+    // Públicas
+    public Material defaultMaterial;
+    public Material lightedMaterial;
+
     // Datos
     private bool isAttacking;   // Está atacando el mosquito?
     private Transform parentAux;
 
     // Ajustes
-    private float maxAttackForce = 30f; // Fuerza máxima de ataque
+    private float maxAttackForce = 25f; // Fuerza máxima de ataque
     private float attackDuration = 5.0f;
     private float attackForceMultiplier = 30f;  // Fuerza de ataque
     #endregion
@@ -61,6 +65,11 @@ public class BulletMosquito : Mosquito
         myPosition = new Vector2(transform.position.x, transform.position.y);
         Vector2 flockingForce = new Vector2(0f, 0f);
 
+        if (!isFlocking)
+        {
+            isAttacking = false;
+        }
+
         // Obtiene las fuerzas  
         if (!isAttacking)
         {
@@ -90,11 +99,15 @@ public class BulletMosquito : Mosquito
     #region PUBLIC METHODS
     public void Attack()
     {
+        if (!isAttacking)
+        {
+            rigidbody.velocity = Vector3.zero;
+            rigidbody.angularVelocity = 0f;
+        }
         isAttacking = true;
         parentAux = transform.parent;
         transform.SetParent(null);
-        rigidbody.velocity = Vector3.zero;
-        rigidbody.angularVelocity = 0f;
+        GetComponentInChildren<MeshRenderer>().material = lightedMaterial;
         Invoke(nameof(StopAttacking), attackDuration);
     }
     #endregion
@@ -103,6 +116,7 @@ public class BulletMosquito : Mosquito
     private void StopAttacking()
     {
         transform.SetParent(parentAux);
+        GetComponentInChildren<MeshRenderer>().material = defaultMaterial;
         isAttacking = false;
     }
     #endregion

@@ -45,7 +45,7 @@ public class MenuController : MonoBehaviour
 
     public void PlayArcadeMode()
     {
-        SceneManager.LoadScene("TestScene");
+        SceneManager.LoadScene("ArcadeScene");
     }
 
     public void QuitGame()

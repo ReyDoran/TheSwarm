@@ -13,4 +13,25 @@ public interface ISubState : IState
     /// </summary>
     /// <returns></returns>
     new ISubState ExecuteState();
+
+    /// <summary>
+    /// Procesa la información de cambio de visibilidad de la presa
+    /// </summary>
+    /// <param name="preyInSight"></param>
+    /// <returns></returns>
+    new ISubState ProcessData(bool preyInSight);
+
+    /// <summary>
+    /// Procesa la información de un cambio de arma de la presa
+    /// </summary>
+    /// <param name="preyWeapon"></param>
+    /// <returns></returns>
+    new ISubState ProcessData(Weapons preyWeapon);
+
+    /// <summary>
+    /// Procesa la información de un cambio en el número de mosquitos del flock
+    /// </summary>
+    /// <param name="mosquitosCount"></param>
+    /// <returns></returns>
+    new ISubState ProcessData(int mosquitosCount);
 }

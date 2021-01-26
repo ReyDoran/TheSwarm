@@ -21,6 +21,7 @@ public class MosquitoAvoidZone : MonoBehaviour
     private const float defaultAttractRadius = 2f;
 
     // Datos
+    private Transform targetObject;
     private List<Mosquito> mosquitosList;
     private bool isAttractZone = false;
     private int maxFollowers;
@@ -46,37 +47,55 @@ public class MosquitoAvoidZone : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (isAttractZone && followers < maxFollowers && !collision.gameObject.GetComponent<Mosquito>().isLeader && !collision.gameObject.GetComponent<Mosquito>().isFollower)
+        if (isAttractZone)
         {
-            collision.gameObject.GetComponent<Mosquito>().isFollower = true;
-            collision.gameObject.GetComponent<Mosquito>().myLeaderZone = this;
-            mosquitosList.Add(collision.gameObject.GetComponent<Mosquito>());
-            followers++;
-        } else if (!isAttractZone)
-        {
-            mosquitosList.Add(collision.gameObject.GetComponent<Mosquito>());
+            if (isAttractZone && followers < maxFollowers && !collision.gameObject.GetComponent<Mosquito>().isLeader && !collision.gameObject.GetComponent<Mosquito>().isFollower)
+            {
+                collision.gameObject.GetComponent<Mosquito>().isFollower = true;
+                collision.gameObject.GetComponent<Mosquito>().myLeaderZone = this;
+                mosquitosList.Add(collision.gameObject.GetComponent<Mosquito>());
+                followers++;
+            }
+            else if (!isAttractZone && !collision.gameObject.Equals(targetObject.gameObject))
+            {
+                mosquitosList.Add(collision.gameObject.GetComponent<Mosquito>());
+            }
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (mosquitosList.Remove(collision.gameObject.GetComponent<Mosquito>()))
+        if (isAttractZone)
         {
-            if (isAttractZone)
-                followers--;
-            collision.gameObject.GetComponent<Mosquito>().isFollower = false;
-            collision.gameObject.GetComponent<Mosquito>().myLeaderZone = null;
-        }
+            if (mosquitosList.Remove(collision.gameObject.GetComponent<Mosquito>()))
+            {
+                if (isAttractZone)
+                {
+                    followers--;
+                    collision.gameObject.GetComponent<Mosquito>().isFollower = false;
+                    collision.gameObject.GetComponent<Mosquito>().myLeaderZone = null;
+                }
+            }
+        }        
     }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        Vector2 direction = new Vector2(collision.gameObject.transform.position.x - transform.position.x, collision.gameObject.transform.position.y - transform.position.y);
+        collision.gameObject.GetComponent<Mosquito>().Avoid(direction, extraForce);
+    }
+
     private void FixedUpdate()
     {
-        foreach (Mosquito mosquito in mosquitosList)
+        if (isAttractZone)
         {
-            Vector2 direction = new Vector2(mosquito.transform.position.x - transform.position.x, mosquito.transform.position.y - transform.position.y);
-            if (!isAttractZone)
-                mosquito.Avoid(direction, extraForce);
-            else
+            foreach (Mosquito mosquito in mosquitosList)
             {
+                Vector2 direction = new Vector2(mosquito.transform.position.x - transform.position.x, mosquito.transform.position.y - transform.position.y);
+            //if (!isAttractZone)
+                //mosquito.Avoid(direction, extraForce);
+            //else
+
                 mosquito.Avoid(-direction);
             }
         }
@@ -102,6 +121,7 @@ public class MosquitoAvoidZone : MonoBehaviour
     /// <param name="target"></param>
     public void SetTarget(Transform target, float forceApplied = 1f)
     {
+        targetObject = target;
         transform.position = target.position;
         transform.SetParent(target);
         extraForce = forceApplied;

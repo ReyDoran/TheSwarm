@@ -136,6 +136,7 @@ public class PlayerMovementController : MonoBehaviour
     private void FixedUpdate()
     {
         ApplyForce();
+        CheckOutOfBounds();
     }
 
     /// <summary>
@@ -402,6 +403,21 @@ public class PlayerMovementController : MonoBehaviour
         {
             inputValueMovement.y = 1 * Mathf.Sign(inputValueMovement.y);
         }
+    }
+
+    /// <summary>
+    /// Impide que el jugador se salga de los límites (hardcoded para el mapa de prueba)
+    /// </summary>
+    private void CheckOutOfBounds()
+    {
+        if (transform.position.y < 9.5)
+            transform.position = new Vector3(transform.position.x, 9.5f, transform.position.z);
+        if (transform.position.y > 155.5)
+            transform.position = new Vector3(transform.position.x, 155.5f, transform.position.z);
+        if (transform.position.x > 12.7)
+            transform.position = new Vector3(12.7f, transform.position.y, transform.position.z);
+        if (transform.position.x < -133.5)
+            transform.position = new Vector3(-133.5f, transform.position.y, transform.position.z);
     }
 
     /// <summary>

@@ -4,11 +4,22 @@ using UnityEngine;
 
 public class SwarmPerception : MonoBehaviour
 {
+    private Swarm mySwarm;
+    public void SetSwarm(Swarm swarm)
+    {
+        mySwarm = swarm;
+    }
+
+    private void FixedUpdate()
+    {
+        transform.position = mySwarm.transform.position;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if(collision.CompareTag("Player"))
         {
-            GetComponentInParent<Swarm>().SetPrey(collision.gameObject.transform);
+            mySwarm.SetPrey(collision.gameObject.transform);
         }
     }
 
@@ -16,7 +27,7 @@ public class SwarmPerception : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            GetComponentInParent<Swarm>().SetPrey(null);
+            mySwarm.SetPrey(null);
         }
     }
 }

@@ -11,7 +11,7 @@ public class PhoenixMosquito : Mosquito
 {
     #region VARIABLES
     private bool isFrontline;   // Forma parte de la primera línea del enjambre?
-    private float frontlineForcePercentage = 0.5f; // Cuanto porcentaje valdrá respecto a cohesionForce
+    private float frontlineForcePercentage = 0.8f; // Cuanto porcentaje valdrá respecto a cohesionForce
     private float frontlineForceModifier;
     //protected new float maxSpeed = 7.5f;
 

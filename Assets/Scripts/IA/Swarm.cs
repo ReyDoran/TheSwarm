@@ -21,7 +21,7 @@ public class Swarm : MonoBehaviour
     #region VARIABLES
     // Referencias
     private CircleCollider2D circleCollider;
-    public CircleCollider2D perceptionCircleCollider;   // Collider de la percepción
+    private CircleCollider2D perceptionCircleCollider;   // Collider de la percepción
     private Transform transform;
 
     // Datos
@@ -38,19 +38,24 @@ public class Swarm : MonoBehaviour
     public bool isAnnexable;    // Se puede anexionar?
     public bool isAnnexionating;     // Está anexionando?
     public bool isPreyInSight;  // Tiene presa a la vista?
+    public int isInFlames; // Está el flock en llamas?
 
     // Ajustes
     private float swarmRadius = 10f;    // Radio del flock (no es el mismo el radio del flock que el radio para captar nuevos mosquitos para el flock)
     private float baseSwarmSize = 7.5f;  // Tamaño mínimo del flock
     private float swarmSizeDivisor = 10f;   // Factor de aumento de tamaño del flock por cada mosquito
     private float swarmForcesRadiusMultiplier; // Factor de disminución del swarm para los mosquitos
-    private float swarmForcesRadiusMultiplierStandard = 0.5f;    // Valor anterior variable para formación standard
+    private float swarmForcesRadiusMultiplierStandard = 0.8f;    // Valor anterior variable para formación standard
     private float swarmForcesRadiusMultiplierCircle = 1f;    // Valor anterior variable para formación círculo
-    private float swarmForcesRadiusMultiplierDisperse = 0.8f;    // Valor anterior variable para formación dispersa
-    private float perceptionRadiusMultiplier = 4f;  // Multiplicador del radio de la percepción respecto al del enjambre
+    private float swarmForcesRadiusMultiplierDisperse = 0.9f;    // Valor anterior variable para formación dispersa
+    private float perceptionRadiusMultiplier = 3.5f;  // Multiplicador del radio de la percepción respecto al del enjambre
     private int minAgentsPerFlock = 5; // Mínimo de agentes para ser considerado flock
     private int annexableTreshold = 20;    // Máximo de agentes hasta convertirse en no anexionable
     private float timesBiggerToAnnex = 3f;    // nº de veces más grande (en nº de unidades) para que un enjambre anexione a otro
+
+    // Percepción
+    public GameObject perceptionPrefab;
+    public GameObject myPerception;
 
     // Controles para los estados
     public GameObject swarmMovementPrefab;
@@ -73,8 +78,12 @@ public class Swarm : MonoBehaviour
         isReady = false;
         isAnnexable = false;
         isPreyInSight = false;
+        isInFlames = 0;
         swarmMovement = Instantiate(swarmMovementPrefab, transform.position, Quaternion.identity);
         myState = new WanderingState(this);
+        myPerception = Instantiate(perceptionPrefab, transform.position, Quaternion.identity);
+        myPerception.GetComponent<SwarmPerception>().SetSwarm(this);
+        perceptionCircleCollider = myPerception.GetComponent<CircleCollider2D>();
     }
 
     /// <summary>
@@ -237,6 +246,7 @@ public class Swarm : MonoBehaviour
                 mosquitosList.Remove(agent);
             }
         }
+        Destroy(perceptionCircleCollider.gameObject);
         Destroy(swarmMovement);
         Destroy(gameObject);
     }

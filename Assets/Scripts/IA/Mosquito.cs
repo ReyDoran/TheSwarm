@@ -32,7 +32,7 @@ public class Mosquito : MonoBehaviour
     public bool isDead = false; // Está muerto?
     public bool isBurning = false;  // Está ardiendo el mosquito?
     public bool isFlocking = false; // Está dentro de un enjambre?
-    protected bool avoidRequested = false; // Está dentro de una avoidZone?
+    public bool avoidRequested = false; // Está dentro de una avoidZone?
     protected GameObject myFlame;
     protected GameObject myAvoidZone; // Zona de evitar de mosquitos asociado a la llama
     public MosquitoAvoidZone myLeaderZone;  // Zona de atracción de líder de escuadrón (ya sea el líder o seguidor)
@@ -41,13 +41,13 @@ public class Mosquito : MonoBehaviour
     // 3) Ajustes
     // 3.1) Multiplicadores de fuerza
     protected float cohesionForceModifier = 11f;   // Multiplicador de fuerza de cohesión
-    private float proximityCohesionModifier = 0.3f; // Multiplicador de la reducción de la fuerza de cohesión en función de la distancia al centro (-0.9 fuerza máxima en el borde, 1 siempre máxima fuerza)
-    private float proximityCohesionModifierStandard = 0.4f; // Valor del multiplicador anterior en caso de formación standard
+    private float proximityCohesionModifier; // Multiplicador de la reducción de la fuerza de cohesión en función de la distancia al centro (-0.9 fuerza máxima en el borde, 1 siempre máxima fuerza)
+    private float proximityCohesionModifierStandard = 0.5f; // Valor del multiplicador anterior en caso de formación standard
     private float proximityCohesionModifierCircle = 0.1f; // Valor del multiplicador anterior en caso de formación círculo
-    private float proximityCohesionModifierDisperse = -0.1f;    // Valor del multiplicador anterior en caso de formación dispersa
+    private float proximityCohesionModifierDisperse = -0.3f;    // Valor del multiplicador anterior en caso de formación dispersa
     private float circleCohesionForceModifier = 10f; // Multiplicador del aumento de fuerza de cohesión para la formación círculo
     private float radiusPercentage = 0.2f;   // Porcentaje del radio del flock que ocuparán los mosquitos (0.2f)
-    private float avoidForceModifier = 20f;     // Multiplicador de fuerza de evasión
+    private float avoidForceModifier = 30f;     // Multiplicador de fuerza de evasión
     private float randomForceModifier = 7f;    // Multiplicador de fuerza aleatoria
     private float randomForceZModifier = 2f; // Mulitplicador de velocidad aleatoria en el eje Z
     // 3.2) Caps
@@ -67,13 +67,13 @@ public class Mosquito : MonoBehaviour
     #region UNITY CALLBACKS
     protected void Awake()
     {
-        burningTime = Random.Range(2f, 4f);
+        burningTime = Random.Range(1.8f, 3.0f);
         transform = GetComponent<Transform>();
         rigidbody = GetComponent<Rigidbody2D>();
         meshTransform = GetComponentInChildren<MeshRenderer>().transform;
         circleCollider = GetComponent<CircleCollider2D>();
         myPosition = new Vector2(0f, 0f);
-        formation = Formations.Standard;
+        SetFormation(Formations.Standard);
     }
 
     protected void OnEnable()
@@ -108,6 +108,8 @@ public class Mosquito : MonoBehaviour
     {
         this.mySwarm = myFlock;
         isFlocking = true;
+        if (isBurning)
+            mySwarm.isInFlames++;
     }
 
     /// <summary>
@@ -115,6 +117,8 @@ public class Mosquito : MonoBehaviour
     /// </summary>
     public void RemoveFlock()
     {
+        if (isBurning && mySwarm != null)
+            mySwarm.isInFlames--;
         this.mySwarm = null;
         transform.SetParent(null);
         isFlocking = false;
@@ -153,6 +157,8 @@ public class Mosquito : MonoBehaviour
         }
         if (isBurning)
         {
+            if (mySwarm != null)
+                mySwarm.isInFlames--;
             myFlame.GetComponent<Flame>().Extinguish();
             myAvoidZone.GetComponent<MosquitoAvoidZone>().ReturnToPool();
         }
@@ -173,6 +179,7 @@ public class Mosquito : MonoBehaviour
         {
             wasSetOnFire = true;
             isBurning = true;
+            mySwarm.isInFlames++;
             Transform auxParent = transform.parent;
             circleCollider.enabled = false;
             transform.parent = auxParent;
@@ -342,6 +349,8 @@ public class Mosquito : MonoBehaviour
             if (Random.Range(0f, 1f) > 0.98f)
             {
                 flyingUpwards = !flyingUpwards;
+                if (!isFlocking && transform.parent != null)
+                    transform.SetParent(null);
             }
             if (flyingUpwards == true)
             {
