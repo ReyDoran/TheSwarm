@@ -18,7 +18,7 @@ public class OrbitingState : ISubState
     private int probabilityToAttack = 5;
     private int minBulletsToSurround = 5;
     // Ajustes
-    float timeToChangeState = 3.5f; // Tiempo base para generar un cambio de estado
+    float timeToChangeState = 3.5f; // Tiempo base para generar un cambio de estado (3.5)
     float timeOffset = 2.0f;    // Tiempo a restar o añadir al anterior de manera aleatoria
     // Ajustes de movimiento
     float orbitRadius = 26f;    // Radio de la órbita (el enjambre se coloca en la mitad
@@ -45,7 +45,9 @@ public class OrbitingState : ISubState
     public void InitState() 
     {
         if (mySwarm.isInFlames > 0)
+        {
             mySwarm.SetFormation(Formations.Disperse);
+        }
         else
             mySwarm.SetFormation(Formations.Standard);
         mySwarm.SetFlamesDefense(mySwarm.GetPrey().gameObject.GetComponent<PlayerMovementController>().drawnWeapon.Equals(Weapons.Flamethrower));
@@ -80,7 +82,7 @@ public class OrbitingState : ISubState
         ApplyCaps();
         ApplyOrbitForceTangencial();
         swarmMovement.position = (Vector2)swarmMovement.position + currentVelocity * Time.fixedDeltaTime;
-
+        
         if (mySwarm.isInFlames <= 3 && !mySwarm.GetPrey().gameObject.GetComponent<PlayerMovementController>().drawnWeapon.Equals(Weapons.Flamethrower))
             mySwarm.SetFormation(Formations.Standard);
         else
@@ -115,7 +117,7 @@ public class OrbitingState : ISubState
 
     public ISubState ProcessData(int mosquitosCount)
     {
-        throw new System.NotImplementedException();
+        return this;
     }
 
     IState IState.ProcessData(bool preyInSight)

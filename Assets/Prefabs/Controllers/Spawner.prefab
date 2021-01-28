@@ -50,6 +50,9 @@ MonoBehaviour:
   phoenixMosquito: {fileID: 1729367894079625381, guid: 918521fb8535d77458c3d47c411da725,
     type: 3}
   phoenixMosquitoFrecuency: 1
+  bulletMosquito: {fileID: 1729367894079625381, guid: f97af0741fbed6d43b60dbee39590c0f,
+    type: 3}
+  bulletMosquitoFrecuency: 0
   mainPool: {fileID: 0}
   numberOfInstances: 0
   formationIndex: 0

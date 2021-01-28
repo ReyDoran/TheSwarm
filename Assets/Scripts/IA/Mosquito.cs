@@ -36,7 +36,7 @@ public class Mosquito : MonoBehaviour
     protected GameObject myFlame;
     protected GameObject myAvoidZone; // Zona de evitar de mosquitos asociado a la llama
     public MosquitoAvoidZone myLeaderZone;  // Zona de atracción de líder de escuadrón (ya sea el líder o seguidor)
-    public int damage = 1;  // Daño al colisionar
+    public int damage = 5;  // Daño al colisionar
 
     // 3) Ajustes
     // 3.1) Multiplicadores de fuerza
@@ -44,7 +44,7 @@ public class Mosquito : MonoBehaviour
     private float proximityCohesionModifier; // Multiplicador de la reducción de la fuerza de cohesión en función de la distancia al centro (-0.9 fuerza máxima en el borde, 1 siempre máxima fuerza)
     private float proximityCohesionModifierStandard = 0.5f; // Valor del multiplicador anterior en caso de formación standard
     private float proximityCohesionModifierCircle = 0.1f; // Valor del multiplicador anterior en caso de formación círculo
-    private float proximityCohesionModifierDisperse = -0.3f;    // Valor del multiplicador anterior en caso de formación dispersa
+    private float proximityCohesionModifierDisperse = -0.2f;    // Valor del multiplicador anterior en caso de formación dispersa
     private float circleCohesionForceModifier = 10f; // Multiplicador del aumento de fuerza de cohesión para la formación círculo
     private float radiusPercentage = 0.2f;   // Porcentaje del radio del flock que ocuparán los mosquitos (0.2f)
     private float avoidForceModifier = 30f;     // Multiplicador de fuerza de evasión
@@ -120,7 +120,8 @@ public class Mosquito : MonoBehaviour
         if (isBurning && mySwarm != null)
             mySwarm.isInFlames--;
         this.mySwarm = null;
-        transform.SetParent(null);
+        if (transform.parent.gameObject.activeInHierarchy)
+            transform.SetParent(null);
         isFlocking = false;
     }
 
@@ -179,7 +180,8 @@ public class Mosquito : MonoBehaviour
         {
             wasSetOnFire = true;
             isBurning = true;
-            mySwarm.isInFlames++;
+            if (mySwarm != null)
+                mySwarm.isInFlames++;
             Transform auxParent = transform.parent;
             circleCollider.enabled = false;
             transform.parent = auxParent;

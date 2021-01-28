@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Comunica al swarm en caso de percibir una presa
+/// </summary>
 public class SwarmPerception : MonoBehaviour
 {
     private Swarm mySwarm;

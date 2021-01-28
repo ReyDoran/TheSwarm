@@ -88,7 +88,7 @@ public class AttackingState : ISubState
 
     public ISubState ProcessData(int mosquitosCount)
     {
-        throw new System.NotImplementedException();
+        return this;
     }
 
     public void EndState() {}

@@ -10,6 +10,9 @@ using UnityEngine;
 /// </summary>
 public interface IState
 {
+    /// <summary>
+    /// Inicializa el estado
+    /// </summary>
     void InitState();
 
     /// <summary>
@@ -38,5 +41,8 @@ public interface IState
     /// <returns></returns>
     IState ProcessData(int mosquitosCount);
     
+    /// <summary>
+    /// Finaliza el estado
+    /// </summary>
     void EndState();
 }

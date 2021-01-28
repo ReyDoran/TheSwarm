@@ -47,11 +47,11 @@ public class Swarm : MonoBehaviour
     private float swarmForcesRadiusMultiplier; // Factor de disminución del swarm para los mosquitos
     private float swarmForcesRadiusMultiplierStandard = 0.8f;    // Valor anterior variable para formación standard
     private float swarmForcesRadiusMultiplierCircle = 1f;    // Valor anterior variable para formación círculo
-    private float swarmForcesRadiusMultiplierDisperse = 0.9f;    // Valor anterior variable para formación dispersa
+    private float swarmForcesRadiusMultiplierDisperse = 0.8f;    // Valor anterior variable para formación dispersa
     private float perceptionRadiusMultiplier = 3.5f;  // Multiplicador del radio de la percepción respecto al del enjambre
     private int minAgentsPerFlock = 5; // Mínimo de agentes para ser considerado flock
     private int annexableTreshold = 20;    // Máximo de agentes hasta convertirse en no anexionable
-    private float timesBiggerToAnnex = 3f;    // nº de veces más grande (en nº de unidades) para que un enjambre anexione a otro
+    private float timesBiggerToAnnex = 1f;    // nº de veces más grande (en nº de unidades) para que un enjambre anexione a otro
 
     // Percepción
     public GameObject perceptionPrefab;
@@ -88,6 +88,7 @@ public class Swarm : MonoBehaviour
 
     /// <summary>
     /// Calcula la posición media del enjambre y se sitúa en ella
+    /// Ejecuta el estado
     /// </summary>
     private void FixedUpdate()
     {
@@ -98,8 +99,6 @@ public class Swarm : MonoBehaviour
 
     /// <summary>
     /// Si se encuentra con un mosquito libre lo anexiona
-    /// Si se encuentra con otro enjambre anexionable más pequeño lo anexiona
-    /// Si es anexionable y se encuentra con otro enjambre más grande se une a él
     /// </summary>
     /// <param name="collision"></param>
     private void OnTriggerEnter2D(Collider2D collision)
@@ -108,28 +107,6 @@ public class Swarm : MonoBehaviour
         {
             if (!collision.gameObject.GetComponent<Mosquito>().isFlocking)
                 AddAgent(collision.gameObject);
-        }
-        else if (collision.gameObject.tag.Equals("Flock"))
-        {
-            if (this.GetInstanceID() > collision.gameObject.GetInstanceID())
-            {
-                Swarm otherFlock = collision.gameObject.GetComponent<Swarm>();
-                if (GetAgentsCount() > otherFlock.GetAgentsCount() * timesBiggerToAnnex && otherFlock.isAnnexable)
-                {
-                    List<GameObject> otherFlockAgents = otherFlock.GetAllAgents();
-                    while (otherFlockAgents.Count > 0)
-                    {
-                        AddAgent(otherFlock.RemoveAgent(otherFlockAgents[0], false));
-                    }
-                }
-                else if (GetAgentsCount() < otherFlock.GetAgentsCount() * timesBiggerToAnnex && isAnnexable)
-                {
-                    while (mosquitosList.Count > 0)
-                    {
-                        otherFlock.AddAgent(RemoveAgent(mosquitosList[0], false));
-                    }
-                }
-            }
         }
     }
 
@@ -142,6 +119,37 @@ public class Swarm : MonoBehaviour
         if (collision.gameObject.tag.Equals("Mosquito"))
         {
             RemoveAgent(collision.gameObject);
+        }
+    }
+
+    /// <summary>
+    /// Si se encuentra con otro enjambre anexionable más pequeño lo anexiona
+    /// Si es anexionable y se encuentra con otro enjambre más grande se une a él
+    /// </summary>
+    /// <param name="collision"></param>
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag.Equals("Flock"))
+        {
+            if (this.GetInstanceID() > collision.gameObject.GetInstanceID())
+            {
+                Swarm otherFlock = collision.gameObject.GetComponent<Swarm>();
+                if (GetAgentsCount() > otherFlock.GetAgentsCount() && otherFlock.isAnnexable)
+                {
+                    List<GameObject> otherFlockAgents = otherFlock.GetAllAgents();
+                    while (otherFlockAgents.Count > 0)
+                    {
+                        AddAgent(otherFlock.RemoveAgent(otherFlockAgents[0], false));
+                    }
+                }
+                else if (GetAgentsCount() < otherFlock.GetAgentsCount() && isAnnexable)
+                {
+                    while (mosquitosList.Count > 0)
+                    {
+                        otherFlock.AddAgent(RemoveAgent(mosquitosList[0], false));
+                    }
+                }
+            }
         }
     }
     #endregion UNITY CALLBACKS
@@ -223,7 +231,8 @@ public class Swarm : MonoBehaviour
         } else
         {
             swarmRadius = baseSwarmSize + mosquitosList.Count / swarmSizeDivisor;
-            perceptionCircleCollider.radius = swarmRadius * perceptionRadiusMultiplier;
+            if (perceptionCircleCollider != null)
+                perceptionCircleCollider.radius = swarmRadius * perceptionRadiusMultiplier;
             circleCollider.radius = swarmRadius;
             foreach (GameObject agent in mosquitosList)
             {
@@ -246,7 +255,8 @@ public class Swarm : MonoBehaviour
                 mosquitosList.Remove(agent);
             }
         }
-        Destroy(perceptionCircleCollider.gameObject);
+        if (perceptionCircleCollider != null)
+            Destroy(perceptionCircleCollider.gameObject);
         Destroy(swarmMovement);
         Destroy(gameObject);
     }
@@ -387,7 +397,7 @@ public class Swarm : MonoBehaviour
             bulletMosquitosList.Remove(newBulletMosquito.gameObject);
         }
         mosquitosList.Remove(removedMosquito);
-        removedMosquito.transform.SetParent(null);
+        //removedMosquito.transform.SetParent(null);
         if (mosquitosList.Count < annexableTreshold)
             isAnnexable = true;
         if (isReady && destroyAuthorization)

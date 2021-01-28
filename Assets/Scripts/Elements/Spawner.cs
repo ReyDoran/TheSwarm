@@ -32,7 +32,7 @@ public class Spawner : MonoBehaviour
 
 
     // TEST
-    public int formationIndex;
+    private int formationIndex;
     #endregion VARIABLES
 
     #region UNITY CALLBACKS
@@ -50,16 +50,6 @@ public class Spawner : MonoBehaviour
     {
         SpawnMosquitosDelayed(numberOfInstances);
         Invoke("ActivateFlock", 1f);
-    }
-
-    void Update()
-    {
-        spawnTimer += Time.deltaTime;
-        if (spawnTimer >= 5)
-        {
-            spawnTimer = 0;
-            //SpawnMosquito();
-        }
     }
     #endregion
 
@@ -120,7 +110,6 @@ public class Spawner : MonoBehaviour
     // Crea un flock en la posición en la que se encuentra
     private void ActivateFlock()
     {
-        Debug.Log(transform.position);
         GameObject newSwarm = Instantiate(swarm, transform.position, Quaternion.identity);
         newSwarm.GetComponent<Swarm>().SetFormation((Formations)formationIndex);
     }
